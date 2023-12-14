@@ -21,6 +21,7 @@ def download_and_extract_epss(url):
 # Function to fetch more information from NVD's database
 def fetch_nvd_data(cve_id):
     response = requests.get(nvd_base_url + cve_id)
+    print(nvd_base_url + cve_id)
     if response.status_code == 200:
         return response.json()
     else:
@@ -29,10 +30,11 @@ def fetch_nvd_data(cve_id):
 # Download and extract the EPSS feed
 epss_df = download_and_extract_epss(epss_url)
 
-# Filter for CVEs with EPSS score greater than 0.5
-high_risk_cves = epss_df[epss_df['epss'] > 0.5]
+# Filter for CVEs with EPSS score greater than 0.5 and year 2015 or later
+high_risk_cves = epss_df[(epss_df['epss'] > 0.5) & (epss_df['cve'].str.contains('CVE-201[8-9]|CVE-20[2-9]'))]
+print(high_risk_cves.count)
 
-# Fetch NVD data for the first 20 high-risk CVEs
+# Fetch NVD data for the first 20 high-risk CVEs from 2015 or later
 nvd_data = []
 for cve_id in high_risk_cves['cve'].head(20):
     try:
